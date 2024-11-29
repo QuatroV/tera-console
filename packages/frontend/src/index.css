@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  @font-face {
+    font-family: Rubik;
+    src: url("/fonts/Rubik-VariableFont_wght.ttf") format("truetype");
+  }
+
+  @font-face {
+    font-family: Dela;
+    src: url("/fonts/DelaGothicOne-Regular.ttf") format("truetype");
+  }
+}
+
+@layer utilities {
+  .scrollbar::-webkit-scrollbar {
+    position: absolute;
+    width: 10px;
+    height: 6px;
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background: #9b9b9b80;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:active {
+    background: #808080;
+    width: 20px;
+  }
+}

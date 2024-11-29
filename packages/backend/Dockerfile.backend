@@ -1,0 +1,11 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json /app/package.json
+COPY yarn.lock /app/yarn.lock
+RUN yarn --frozen-lockfile
+COPY . /app
+EXPOSE 4000 
+RUN chown -R node:node /app
+USER node
+RUN yarn prisma generate
+CMD ["yarn", "dev"]

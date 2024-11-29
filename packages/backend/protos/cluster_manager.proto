@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package cluster_manager;
+
+// Enum для статусов контейнера
+enum InstanceStatus {
+  UNKNOWN = 0;   // Неизвестный статус
+  CREATING = 1;  // Создается
+  RUNNING = 2;   // Запущен
+  STOPPED = 3;   // Остановлен
+  DELETED = 4;   // Удален
+  ERROR = 5;     // Ошибка
+}
+
+// Общие структуры
+message ResourceMetadata {
+  string id = 1;
+  string name = 2;
+  string created_at = 3;
+  string updated_at = 4;
+}
+
+// Ответ после создания инстанса
+message InstanceResponse {
+  ResourceMetadata metadata = 1;
+  InstanceStatus status = 2; 
+  string public_ip = 3;
+  string private_ip = 4;
+  repeated string network_ids = 5;
+  repeated string volume_ids = 6;
+  string hub_link = 7;
+}
+
+// Сообщение запроса для создания инстанса
+message CreateInstanceRequest {
+  string name = 1;
+  string image_source = 2;
+  string instance_type = 3;
+  int32 cpu = 4;
+  int32 memory = 5;
+  int32 storage = 6;
+}
+
+// Сообщение запроса для действий с инстансом
+message InstanceActionRequest {
+  string instance_id = 1;
+}
+
+// Ответ на действия с инстансом
+message InstanceActionResponse {
+  string instance_id = 1;
+  InstanceStatus status = 2; 
+  string message = 3;
+}
+
+// Ответ с текущим статусом инстанса
+message GetInstanceStatusResponse {
+  string instance_id = 1;
+  InstanceStatus status = 2;
+}
+
+// Определение сервиса
+service ClusterManager {
+  rpc CreateInstance(CreateInstanceRequest) returns (InstanceResponse);
+  rpc GetInstanceStatus(InstanceActionRequest) returns (GetInstanceStatusResponse);
+  rpc StopInstance(InstanceActionRequest) returns (InstanceActionResponse);
+  rpc StartInstance(InstanceActionRequest) returns (InstanceActionResponse);
+  rpc DeleteInstance(InstanceActionRequest) returns (InstanceActionResponse);
+}
