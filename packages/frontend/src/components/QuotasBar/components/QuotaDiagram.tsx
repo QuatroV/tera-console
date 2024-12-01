@@ -28,30 +28,31 @@ const QuotaDiagram = ({
   Icon,
 }: QuotaDiagramProps) => {
   return (
-    <section className="bg-white pt-2 rounded-lg flex-1 flex flex-col min-w-[160px]">
+    <section className="bg-white rounded-2xl p-1 flex-1 flex flex-col min-w-[160px] gap-0.5">
       <div
-        className={cn(
-          "rounded-2xl mb-2 flex justify-between mx-2",
-          COLOR_IDX[idx]?.bg
-        )}
+        className={cn("rounded-2xl flex justify-between", COLOR_IDX[idx]?.bg)}
       >
         <div
           className={cn(
-            "p-4 rounded-2xl w-14 h-14 xl:w-20 xl:h-20",
+            "p-4 rounded-2xl aspect-square w-20 h-20",
             COLOR_IDX[idx]?.main
           )}
         >
           {Icon}
         </div>
-        <div className="flex flex-col items-end justify-end px-4 py-2">
-          <p className="xl:text-lg font-semibold">{remainingText}</p>
-          <p className="text-gray-500 text-xs xl:text-sm">{outOfText}</p>
+        <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end justify-end px-4 py-2 ">
+            <p className="xl:text-lg font-semibold">{remainingText}</p>
+            <p className="text-gray-500 text-xs">{outOfText}</p>
+          </div>
+
+          <h6 className="bg-white px-4 rounded-tl-2xl text-sm flex justify-end w-min">
+            {label}
+          </h6>
         </div>
       </div>
 
-      <div className="flex justify-end font-medium px-2 mb-1">
-        <h6>{label}</h6>
-      </div>
+      <div className="flex justify-end font-medium"></div>
 
       <QuotaProgressbar progress={progress} />
     </section>

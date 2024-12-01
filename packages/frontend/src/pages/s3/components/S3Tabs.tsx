@@ -1,19 +1,19 @@
 import Card from "@/components/Card";
 
-const ProjectSettingsTabs = () => {
+const S3Tabs = () => {
   return (
-    <div className="flex gap-2 bg-gray-200 p-2 rounded-xl w-min">
+    <div className="flex gap-2 bg-gray-200 p-2 rounded-xl w-min mb-2">
       <Card className="cursor-pointer font-semibold px-4 hover:bg-gray-300 active:shadow-inner transition-all whitespace-pre">
-        Общая информация
+        Объекты
       </Card>
       <Card className="bg-transparent cursor-pointer font-semibold px-4 hover:bg-gray-300 active:shadow-inner transition-all whitespace-pre">
-        Квоты
+        Настройки
       </Card>
       <Card className="bg-transparent cursor-pointer font-semibold px-4 hover:bg-gray-300 active:shadow-inner transition-all whitespace-pre">
-        Цены
+        Мониторинг
       </Card>
     </div>
   );
 };
 
-export default ProjectSettingsTabs;
+export default S3Tabs;

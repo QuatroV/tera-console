@@ -11,6 +11,7 @@ import { Navigate, RouteObject } from "react-router-dom";
 import Project from "@/pages/project";
 import VerifyEmail from "@/pages/verifyEmail";
 import VirtualMachine from "@/pages/virtualMachines/pages/virtualMachine";
+import S3 from "@/pages/s3";
 
 export const PAGES = {
   WELCOME: {
@@ -48,6 +49,10 @@ export const PAGES = {
   VERIFY_EMAIL: {
     name: "verify_email",
     path: "/verify_email",
+  },
+  S3: {
+    name: "s3",
+    path: "/s3",
   },
 } as const;
 
@@ -97,6 +102,11 @@ export const PAGES_ROUTES: RouteObject[] = [
             id: PAGES.NOTIFICATIONS.name,
             path: PAGES.NOTIFICATIONS.path,
             element: <Notifications />,
+          },
+          {
+            id: PAGES.S3.name,
+            path: PAGES.S3.path,
+            element: <S3 />,
           },
         ],
       },

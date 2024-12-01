@@ -1,5 +1,5 @@
 import Breadcrumbs from "@/components/Breadcrumbs";
-import SectionIcon from "@/components/SectionIcon/SectionIcon";
+import SectionIcon from "@/components/SectionIcon";
 import { PAGES } from "@/router/constants";
 import { RiInstanceFill } from "react-icons/ri";
 

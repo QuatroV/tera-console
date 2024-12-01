@@ -1,6 +1,6 @@
 import { PAGES } from "@/router/constants";
 import { IconBaseProps } from "react-icons";
-import { FaComputer } from "react-icons/fa6";
+import { FaBucket, FaComputer } from "react-icons/fa6";
 import { HiDocumentDuplicate } from "react-icons/hi";
 import { IoMdHelpBuoy } from "react-icons/io";
 import { MdSpaceDashboard } from "react-icons/md";
@@ -33,6 +33,13 @@ export const getSidebarItems = () => [
         protected: true,
       },
     ],
+  },
+  {
+    name: PAGES.S3.name,
+    path: PAGES.S3.path,
+    label: "S3 Хранилище",
+    protected: true,
+    Icon: (props: IconBaseProps) => <FaBucket {...props} />,
   },
   {
     name: "docs",

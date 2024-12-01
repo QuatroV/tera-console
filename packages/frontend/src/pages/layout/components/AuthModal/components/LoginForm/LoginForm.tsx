@@ -19,6 +19,8 @@ import BackendErrors from "../BackendErrors";
 import Spinner from "@/components/Spinner";
 import RememberMeCheckbox from "../RememberMeCheckbox";
 import localStore from "@/utils/localStore";
+import { useNavigate } from "react-router-dom";
+import { PAGES, PAGES_ROUTES } from "@/router/constants";
 
 const initialValues: LoginFormValues = {
   [FIELDS.EMAIL]: "",
@@ -29,6 +31,8 @@ const LoginForm = () => {
   const [backendErrorMsg, setBackendErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(localStore.get("user") !== null);
+
+  const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
 
@@ -60,6 +64,8 @@ const LoginForm = () => {
         dispatch(setAuthenticated(true));
         dispatch(setUser(response.data.user));
         dispatch(closeAuthModal());
+
+        navigate(PAGES.CONSOLE.path);
       } else {
         throw new Error("Can't get user info");
       }

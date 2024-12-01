@@ -4,9 +4,9 @@ type QuotaProgressbarProps = {
 
 const QuotaProgressbar = ({ progress }: QuotaProgressbarProps) => {
   return (
-    <div className="bg-gray-300 h-2 rounded-b-lg">
+    <div className="bg-gray-300 h-1 rounded-lg mx-4">
       <div
-        className="bg-indigo-300 h-2 rounded-b-lg"
+        className="bg-indigo-300 h-1 rounded-lg"
         style={{ width: progress }}
       ></div>
     </div>

@@ -48,7 +48,6 @@ const Table = ({ instances }: TableProps) => {
 
   return (
     <div className="w-full flex flex-col">
-      {/* Заголовок таблицы */}
       <div className="flex ">
         {table.getHeaderGroups().map((headerGroup) => (
           <div
@@ -68,7 +67,6 @@ const Table = ({ instances }: TableProps) => {
           </div>
         ))}
       </div>
-      {/* Строки таблицы */}
       <div className="flex flex-col">
         {table.getRowModel().rows.map((row) => (
           <div

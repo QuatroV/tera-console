@@ -24,6 +24,7 @@ const BlocksContainer = () => {
           }
         />
         <ServiceBlock
+          onClick={() => navigate(PAGES.S3.path)}
           label="S3 Хранилище"
           description="Надежное и масштабируемое облачное решение для хранения данных любого типа и размера с высокой доступностью и безопасностью хранимых данных"
           Icon={
