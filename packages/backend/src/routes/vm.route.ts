@@ -246,11 +246,10 @@ const vmRouter = router({
         throw new Error(error.message || "Ошибка при удалении инстанса");
       }
     }),
-  // streamLogs: async generator instead of observable
   streamLogs: privateProcedure
     .input(streamLogsSchema)
     .subscription(async function* ({ input }) {
-      const call = streamLogsRPC(input.id); // gRPC call (ClientReadableStream)
+      const call = streamLogsRPC(input.id);
 
       const queue: string[] = [];
       let done = false;
@@ -293,36 +292,31 @@ const vmRouter = router({
     }),
   streamStats: privateProcedure
     .input(streamStatsSchema)
-    .subscription(({ input }) => {
-      return observable((emit) => {
-        const call = streamStatsRPC(input.instanceId); // ← gRPC client stream
+    .subscription(async function* ({ input, signal }) {
+      const call = streamStatsRPC(input.instanceId);
 
-        const onData = (msg: any) => {
-          emit.next(msg); // передаём метрику на клиент
-        };
-
-        const onEnd = () => {
-          emit.complete();
-        };
-
-        const onError = (err: any) => {
-          emit.error(err);
-        };
-
-        call.on("data", onData);
-
-        call.on("end", onEnd);
-
-        call.on("error", onError);
-
-        return () => {
-          call.off("data", onData);
-          call.off("end", onEnd);
-          call.off("error", onError);
-
-          call.cancel(); // отмена подписки
-        };
+      const queue: any[] = [];
+      let done = false;
+      call.on("data", (msg) => queue.push(msg));
+      call.on("end", () => (done = true));
+      call.on("error", (err) => {
+        done = true;
       });
+
+      try {
+        while (!done || queue.length > 0) {
+          if (signal?.aborted) {
+            break;
+          }
+          if (queue.length) {
+            yield queue.shift()!;
+          } else {
+            await new Promise((r) => setTimeout(r, 200));
+          }
+        }
+      } finally {
+        if (!signal?.aborted) call.cancel();
+      }
     }),
 });
 

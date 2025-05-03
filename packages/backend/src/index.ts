@@ -12,6 +12,16 @@ import { createHTTPContext, createWSContext } from "./utils/context";
 import customConfig from "./config/default";
 import connectDB from "./utils/prisma";
 
+// Хак, так как адаптер tRPC пытается отослать ивенты в закрытое WS-соединение
+process.on("uncaughtException", (err) => {
+  if (err.message.includes("WebSocket is not open")) {
+    console.warn("[uncaughtException] suppressed:", err.message);
+    return;
+  }
+  // иначе — шлём дальше, чтобы не скрыть реальные проблемы
+  throw err;
+});
+
 const PORT = customConfig.port;
 
 // ————————————————————————————————————
