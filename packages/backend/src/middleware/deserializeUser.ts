@@ -14,6 +14,7 @@ export const deserializeUser = async ({
   try {
     // Get the token
     let access_token;
+
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
@@ -62,6 +63,30 @@ export const deserializeUser = async ({
       res,
       user,
     };
+  } catch (err: any) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: err.message,
+    });
+  }
+};
+
+export const deserializeWsUser = async (token?: string) => {
+  try {
+    if (!token) return { user: null };
+
+    const decoded = verifyJwt<{ sub: string }>(token, "accessTokenPublicKey");
+    if (!decoded) return { user: null };
+
+    const session = await redisClient.get(decoded.sub);
+    if (!session) return { user: null };
+
+    const sessionData = JSON.parse(session);
+    const user = await findUniqueUser({ id: sessionData.id });
+
+    if (!user) return { user: null };
+
+    return { user };
   } catch (err: any) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",

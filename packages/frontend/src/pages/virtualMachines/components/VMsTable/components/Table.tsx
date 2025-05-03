@@ -8,8 +8,17 @@ import {
 import NoInstances from "./NoInstances";
 import { InstanceInfo } from "../types";
 import { useNavigate } from "react-router-dom";
+import InstanceStatusMarker from "../../InstanceStatusMarker";
+import Spinner from "@/components/Spinner";
 
 const columns: ColumnDef<InstanceInfo>[] = [
+  {
+    header: "Статус",
+    accessorKey: "status",
+    cell: ({ row }) => (
+      <InstanceStatusMarker instanceStatus={row.original.status} />
+    ),
+  },
   {
     header: "Имя инстанса",
     accessorKey: "name",
@@ -22,7 +31,14 @@ const columns: ColumnDef<InstanceInfo>[] = [
     header: "Ссылка",
     accessorKey: "link",
     cell: ({ row }) => (
-      <a href={row.original.link} target="_blank" rel="noopener noreferrer">
+      <a
+        href={row.original.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 underline overflow-hidden text-ellipsis line-clamp-1 break-words"
+        /** ← главное: не даём клику всплыть на div-строку */
+        onClick={(e) => e.stopPropagation()}
+      >
         {row.original.link}
       </a>
     ),
@@ -30,10 +46,11 @@ const columns: ColumnDef<InstanceInfo>[] = [
 ];
 
 type TableProps = {
+  loading: boolean;
   instances: InstanceInfo[];
 };
 
-const Table = ({ instances }: TableProps) => {
+const Table = ({ instances, loading }: TableProps) => {
   const navigate = useNavigate();
 
   const table = useReactTable({
@@ -41,6 +58,15 @@ const Table = ({ instances }: TableProps) => {
     data: instances,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center gap-2 p-8">
+        <Spinner className="size-16 text-gray-400" />
+        <div className="text-gray-400">Загрузка данных</div>
+      </div>
+    );
+  }
 
   if (!instances.length) {
     return <NoInstances />;

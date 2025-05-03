@@ -71,10 +71,6 @@ const columns: ColumnDef<S3File>[] = [
     accessorKey: "size",
   },
   {
-    header: "Класс хранилища",
-    accessorKey: "storageClass",
-  },
-  {
     header: "Последнее изменение",
     accessorKey: "lastModified",
   },

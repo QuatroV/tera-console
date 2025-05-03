@@ -17,9 +17,11 @@ const VMTable = ({
   return (
     <div className="rounded-2xl bg-white p-2 mb-4">
       <TableHeader
+        containerLink={properties.link}
         instanceStatus={instanceStatus}
         instanceId={instanceId}
         setInstanceStatus={setInstanceStatus}
+        instanceType={properties.instanceType}
       />
       <Table properties={properties} />
     </div>

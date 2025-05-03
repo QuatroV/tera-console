@@ -4,3 +4,5 @@ export type InstanceProperties = {
   createdAt: string;
   link: string;
 };
+
+export type VMTab = "main" | "monitoring" | "console" | "logs";

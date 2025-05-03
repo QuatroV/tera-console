@@ -5,6 +5,7 @@ import { InstanceInfo } from "./types";
 import trpc from "@/utils/api";
 
 const VMsTable = () => {
+  const [loading, setLoading] = useState(true);
   const [instances, setInstances] = useState<InstanceInfo[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -20,6 +21,8 @@ const VMsTable = () => {
         setInstances(result.instances);
       } catch (e) {
         console.error(e);
+      } finally {
+        setLoading(false);
       }
     };
     fetchInstances();
@@ -29,6 +32,7 @@ const VMsTable = () => {
     <div className="rounded-2xl bg-white p-2 mb-4">
       <TableHeader setSearchTerm={setSearchTerm} />
       <Table
+        loading={loading}
         instances={instances.filter((instance) =>
           instance.name.includes(searchTerm)
         )}

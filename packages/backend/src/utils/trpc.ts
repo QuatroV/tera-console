@@ -1,13 +1,14 @@
 import { initTRPC, TRPCError } from "@trpc/server";
-import { Context } from "./context";
+import { HTTPContext, WSContext } from "./context";
 
 import { Response } from "express";
 import { CookieOptions } from "express";
 import customConfig from "../config/default";
 
-const t = initTRPC.context<Context>().create(); // initialize trpc (must be done once)
+const t = initTRPC.context<HTTPContext>().create(); // initialize trpc (must be done once)
 
 const isAuthorized = t.middleware(({ ctx, next }) => {
+  console.log("DEBUG :", ctx.user);
   if (!ctx.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
@@ -30,6 +31,7 @@ const cookieOptions: CookieOptions = {
 const accessTokenCookieOptions: CookieOptions = {
   ...cookieOptions,
   expires: new Date(Date.now() + customConfig.accessTokenExpiresIn * 60 * 1000),
+  httpOnly: false,
 };
 
 const refreshTokenCookieOptions: CookieOptions = {

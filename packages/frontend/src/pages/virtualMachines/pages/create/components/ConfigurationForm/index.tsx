@@ -1,7 +1,7 @@
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 import Input from "@/components/Input";
-// import Select from "@/components/Select";
+import Select from "@/components/Select";
 import Spinner from "@/components/Spinner";
 import { PAGES } from "@/router/constants";
 import { addNotification } from "@/store/notification";
@@ -9,7 +9,7 @@ import trpc from "@/utils/api";
 import { useAppDispatch } from "@/utils/redux";
 import { nanoid } from "@reduxjs/toolkit";
 import { useState } from "react";
-// import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowDown } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 
 const ConfiguraionForm = () => {
@@ -18,7 +18,7 @@ const ConfiguraionForm = () => {
   const [success, setSuccess] = useState<boolean | undefined>(undefined);
   const [instanceId, setInstanceId] = useState("");
   const [instanceName, setInstanceName] = useState("");
-  const [dockerImage, setDockerImage] = useState("ubuntu:20.04");
+  const [instanceType, setInstanceType] = useState("jupiter_hub");
 
   const navigate = useNavigate();
 
@@ -29,7 +29,7 @@ const ConfiguraionForm = () => {
       setLoading(true);
       const res = await trpc.vm.createInstance.mutate({
         instanceName,
-        dockerImage,
+        instanceType,
       });
 
       console.log("Инстанс успешно создан", res);
@@ -70,7 +70,7 @@ const ConfiguraionForm = () => {
             onChange={(e) => setInstanceName(e.target.value)}
           />
         </div>
-        <div className="flex flex-col w-96 gap-2">
+        {/* <div className="flex flex-col w-96 gap-2">
           <label className="font-semibold">Название образа Docker</label>
           <Input
             value={dockerImage}
@@ -78,31 +78,28 @@ const ConfiguraionForm = () => {
             placeholder="ubuntu:20.04"
             onChange={(e) => setDockerImage(e.target.value)}
           />
-        </div>
-        {/* <div className="flex flex-col w-96 gap-2">
+        </div> */}
+        <div className="flex flex-col w-96 gap-2">
           <label className="font-semibold">Категория виртуальной машины</label>
           <Select
             className="border p-4 rounded-xl"
             dropdownClassName="min-w-full mt-4"
             options={[
-              <div className="p-2" key="1">
-                1
-              </div>,
-              <div className="p-2" key="2">
-                2
-              </div>,
-              <div className="p-2" key="3">
-                3
+              <div className="p-2 cursor-pointer" key="1">
+                Jupiter Hub
               </div>,
             ]}
           >
-            <div className="flex justify-between items-center">
-              <div>Тераграф</div>
+            <div
+              className="flex justify-between items-center"
+              onClick={() => setInstanceType("jupiter_hub")}
+            >
+              <div>Jupiter Hub</div>
               <IoIosArrowDown size={20} />
             </div>
           </Select>
         </div>
-        <div className="flex flex-col w-96 gap-2">
+        {/* <div className="flex flex-col w-96 gap-2">
           <label className="font-semibold">Размер диска</label>
           <div className="flex gap-2">
             <Button className="text-black rounded-xl bg-gray-200 px-6">
@@ -113,29 +110,6 @@ const ConfiguraionForm = () => {
               +
             </Button>
           </div>
-        </div>
-        <div className="flex flex-col w-96 gap-2">
-          <label className="font-semibold">Операционная система</label>
-          <Select
-            className="border p-4 rounded-xl"
-            dropdownClassName="min-w-full mt-4"
-            options={[
-              <div className="p-2" key="1">
-                1
-              </div>,
-              <div className="p-2" key="2">
-                2
-              </div>,
-              <div className="p-2" key="3">
-                3
-              </div>,
-            ]}
-          >
-            <div className="flex justify-between items-center">
-              <div>Ubuntu</div>
-              <IoIosArrowDown size={20} />
-            </div>
-          </Select>
         </div> */}
         <div className="flex gap-2">
           <Button

@@ -15,7 +15,7 @@ const customConfig: {
   frontendUrl: string;
 } = {
   port: Number(process.env.PORT) as number,
-  accessTokenExpiresIn: 15000, // TODO: Fix time
+  accessTokenExpiresIn: 999999999, // TODO: Fix time
   refreshTokenExpiresIn: 60,
   redisCacheExpiresIn: 60,
   origin: process.env.ORIGIN as string,

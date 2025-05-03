@@ -2,7 +2,10 @@ import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
 
-// Опции загрузки .proto файла
+/* ------------------------------------------------------------------ */
+/* 1. Загрузка .proto и создание клиента                              */
+/* ------------------------------------------------------------------ */
+
 const PROTO_OPTIONS: protoLoader.Options = {
   keepCase: true,
   longs: String,
@@ -11,34 +14,27 @@ const PROTO_OPTIONS: protoLoader.Options = {
   oneofs: true,
 };
 
-// Путь к .proto файлу
 const PROTO_PATH = path.resolve(
   __dirname,
   "../../protos/cluster_manager.proto"
 );
 
-// Загрузка и компиляция .proto файла
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, PROTO_OPTIONS);
 const grpcPackage = grpc.loadPackageDefinition(packageDefinition) as any;
 
-// Получение конструктора клиента
 const ClusterManager = grpcPackage.cluster_manager.ClusterManager;
 
-// Создание экземпляра клиента
+/** singleton-клиент */
 const client = new ClusterManager(
-  "localhost:50051", // Адрес вашего gRPC сервера
+  process.env.GRPC_HOST ?? "localhost:50051",
   grpc.credentials.createInsecure()
 );
 
-// Функция для создания инстанса
-export function createInstance(
-  instanceName: string,
-  instanceType: string,
-  imageSource: string,
-  cpu: number,
-  memory: number,
-  storage: number
-): Promise<{
+/* ------------------------------------------------------------------ */
+/* 2. Типы ответов (чтобы не тянуть генерируемые .d.ts)               */
+/* ------------------------------------------------------------------ */
+
+export interface InstanceResponse {
   metadata: {
     id: string;
     name: string;
@@ -51,115 +47,112 @@ export function createInstance(
   network_ids: string[];
   volume_ids: string[];
   hub_link: string;
-}> {
-  return new Promise((resolve, reject) => {
-    const request = {
-      name: instanceName,
-      instance_type: instanceType,
-      cpu: cpu,
-      memory: memory,
-      storage: storage,
-      image_source: imageSource,
-    };
-
-    client.CreateInstance(
-      request,
-      (error: grpc.ServiceError, response: any) => {
-        if (error) {
-          return reject(new Error(`gRPC error: ${error.message}`));
-        }
-
-        resolve(response);
-      }
-    );
-  });
 }
 
-// Функция для получения статуса инстанса
-export function getInstanceStatus(instanceId: string): Promise<{
+export interface InstanceStatusResponse {
   instance_id: string;
   status: string;
-}> {
-  return new Promise((resolve, reject) => {
-    const request = {
-      instance_id: instanceId,
-    };
-
-    client.GetInstanceStatus(
-      request,
-      (error: grpc.ServiceError, response: any) => {
-        if (error) {
-          return reject(new Error(`gRPC error: ${error.message}`));
-        }
-
-        resolve(response);
-      }
-    );
-  });
 }
 
-// Функция для остановки инстанса
-export function stopInstance(instanceId: string): Promise<{
+export interface InstanceActionResponse {
   instance_id: string;
   status: string;
   message: string;
-}> {
+}
+
+export interface LogLine {
+  line: string;
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Promise-обёртки поверх gRPC unary методов                       */
+/* ------------------------------------------------------------------ */
+
+function promisifyUnary<Req, Res>(method: string, request: Req): Promise<Res> {
   return new Promise((resolve, reject) => {
-    const request = {
-      instance_id: instanceId,
-    };
-
-    client.StopInstance(request, (error: grpc.ServiceError, response: any) => {
-      if (error) {
-        return reject(new Error(`gRPC error: ${error.message}`));
-      }
-
-      resolve(response);
+    (client as any)[method](request, (err: grpc.ServiceError, resp: Res) => {
+      if (err) return reject(new Error(`gRPC ${method}: ${err.message}`));
+      resolve(resp);
     });
   });
 }
 
-// Функция для запуска инстанса
-export function startInstance(instanceId: string): Promise<{
-  instance_id: string;
-  status: string;
-  message: string;
-}> {
-  return new Promise((resolve, reject) => {
-    const request = {
-      instance_id: instanceId,
-    };
-
-    client.StartInstance(request, (error: grpc.ServiceError, response: any) => {
-      if (error) {
-        return reject(new Error(`gRPC error: ${error.message}`));
-      }
-
-      resolve(response);
-    });
+export function createInstance(
+  name: string,
+  instanceType: string,
+  imageSource: string,
+  cpu: number,
+  memory: number,
+  storage: number
+) {
+  return promisifyUnary<any, InstanceResponse>("CreateInstance", {
+    name,
+    instance_type: instanceType,
+    image_source: imageSource,
+    cpu,
+    memory,
+    storage,
   });
 }
 
-// Функция для удаления инстанса
-export function deleteInstance(instanceId: string): Promise<{
-  instance_id: string;
-  status: string;
-  message: string;
-}> {
-  return new Promise((resolve, reject) => {
-    const request = {
-      instance_id: instanceId,
-    };
-
-    client.DeleteInstance(
-      request,
-      (error: grpc.ServiceError, response: any) => {
-        if (error) {
-          return reject(new Error(`gRPC error: ${error.message}`));
-        }
-
-        resolve(response);
-      }
-    );
+export const getInstanceStatus = (id: string) =>
+  promisifyUnary<any, InstanceStatusResponse>("GetInstanceStatus", {
+    instance_id: id,
   });
+
+export const stopInstance = (id: string) =>
+  promisifyUnary<any, InstanceActionResponse>("StopInstance", {
+    instance_id: id,
+  });
+
+export const startInstance = (id: string) =>
+  promisifyUnary<any, InstanceActionResponse>("StartInstance", {
+    instance_id: id,
+  });
+
+export const deleteInstance = (id: string) =>
+  promisifyUnary<any, InstanceActionResponse>("DeleteInstance", {
+    instance_id: id,
+  });
+
+/* ------------------------------------------------------------------ */
+/* 4. СТРИМ ЛОГОВ: возвращаем ClientReadableStream<LogLine>           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * streamLogs — сервер-стриминг.
+ * Вы сами решаете, как трансформировать поток:
+ *   - в tRPC subscription (observable)
+ *   - в SSE (res.write)
+ *   - или прямо читать .on('data').
+ *
+ * @example
+ *   const call = streamLogs(id);
+ *   call.on('data', ({ line }) => console.log(line));
+ *   call.on('end', () => console.log('done'));
+ */
+export function streamLogs(
+  instanceId: string
+): grpc.ClientReadableStream<LogLine> {
+  const req = { instance_id: instanceId };
+  return (client as any).StreamLogs(req); // тип any, т.к. d.ts не сгенерены
+}
+
+export function execCommand(instanceId: string, command: string) {
+  const req = { instance_id: instanceId, command };
+  return (client as any).ExecCommand(req) as grpc.ClientReadableStream<{
+    output: string;
+  }>;
+}
+
+export function streamStats(instanceId: string): grpc.ClientReadableStream<{
+  cpu_percent: number;
+  memory_usage: number;
+  memory_limit: number;
+  blk_read: number;
+  blk_write: number;
+  net_rx_bytes: number;
+  net_tx_bytes: number;
+}> {
+  return (client as any).StreamStats({ instance_id: instanceId });
 }

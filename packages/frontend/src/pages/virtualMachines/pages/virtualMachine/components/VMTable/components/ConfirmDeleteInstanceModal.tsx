@@ -23,7 +23,9 @@ const ConfirmDeleteInstanceModal = ({
       open={modalOpen}
       onClose={() => setModalOpen(false)}
     >
-      <p className="mb-4 w-96">Вы уверены что хотите удалить инстанс {id}?</p>
+      <p className="mb-4 w-96 break-words">
+        Вы уверены что хотите удалить инстанс {id}?
+      </p>
       <div className="flex gap-2 justify-end">
         <Button
           className="bg-red-300"

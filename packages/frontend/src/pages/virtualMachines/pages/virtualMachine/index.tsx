@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import VirtualMachinePageTitle from "./components/VMPageTitle";
 import trpc from "@/utils/api";
 import { useParams } from "react-router-dom";
-import VMTable from "./components/VMTable";
-import { InstanceProperties } from "./types";
+import { InstanceProperties, VMTab } from "./types";
 import VMTabs from "./components/VMTabs";
-import Spinner from "@/components/Spinner";
+
+const VMMainTab = lazy(() => import("./components/VMMainTab"));
+const VMLogTab = lazy(() => import("./components/VMLogTab"));
+const VMConsoleTab = lazy(() => import("./components/VMConsoleTab"));
+const VMStatsTab = lazy(() => import("./components/VMStatsTab"));
 
 const VirtualMachine = () => {
   const { id } = useParams<{ id: string }>();
@@ -51,29 +54,41 @@ const VirtualMachine = () => {
     };
   }, [id]);
 
+  const [tab, setTab] = useState<VMTab>("main");
+
   return (
     <div className="flex flex-col gap-2">
       <VirtualMachinePageTitle
+        instanceType={instanceProperties?.instanceType}
         instanceStatus={instanceStatus}
-        instanceId={id || ""}
         instanceName={instanceName}
       />
-      <VMTabs />
-      {instanceProperties ? (
-        <VMTable
-          instanceId={id || ""}
-          instanceStatus={instanceStatus || ""}
-          setInstanceStatus={setInstanceStatus}
-          properties={instanceProperties}
-        />
-      ) : (
-        <div className="bg-white rounded-2xl h-64 p-2 mb-4 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-2">
-            <Spinner className="size-16 text-gray-400" />
-            <div className="text-gray-400">Загрузка данных</div>
-          </div>
-        </div>
-      )}
+      <VMTabs tab={tab} setTab={setTab} />
+      {tab === "main" ? (
+        <Suspense fallback={null}>
+          <VMMainTab
+            instanceId={id || ""}
+            instanceStatus={instanceStatus || ""}
+            setInstanceStatus={setInstanceStatus}
+            instanceProperties={instanceProperties}
+          />
+        </Suspense>
+      ) : null}
+      {tab === "logs" ? (
+        <Suspense fallback={null}>
+          <VMLogTab instanceId={id || ""} />
+        </Suspense>
+      ) : null}
+      {tab === "console" ? (
+        <Suspense fallback={null}>
+          <VMConsoleTab instanceId={id || ""} />
+        </Suspense>
+      ) : null}
+      {tab === "monitoring" ? (
+        <Suspense>
+          <VMStatsTab instanceId={id || ""} />
+        </Suspense>
+      ) : null}
     </div>
   );
 };

@@ -6,7 +6,7 @@ export const createInstanceSchema = z.object({
   cpu: z.number().optional(),
   memory: z.number().optional(),
   storage: z.number().optional(),
-  dockerImage: z.string(),
+  dockerImage: z.string().optional(),
 });
 
 export const getInstanceSchema = z.object({
@@ -23,4 +23,17 @@ export const stopInstanceSchema = z.object({
 
 export const deleteInstanceSchema = z.object({
   id: z.string(),
+});
+
+export const streamLogsSchema = z.object({
+  id: z.string(),
+});
+
+export const execCommandSchema = z.object({
+  instanceId: z.string(),
+  command: z.string(),
+});
+
+export const streamStatsSchema = z.object({
+  instanceId: z.string(),
 });

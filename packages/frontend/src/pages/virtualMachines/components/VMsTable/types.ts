@@ -3,4 +3,5 @@ export type InstanceInfo = {
   name: string;
   link: string;
   instanceType: string;
+  status: string;
 };

@@ -1,27 +1,35 @@
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { PAGES } from "@/router/constants";
 import { RiInstanceFill } from "react-icons/ri";
-import InstanceStatusMarker from "./components/InstanceStatusMarker";
+import InstanceStatusMarker from "../../../../components/InstanceStatusMarker";
 import SectionIcon from "@/components/SectionIcon/SectionIcon";
+import { SiJupyter } from "react-icons/si";
 
 type PageTitleProps = {
   instanceName: string;
-  instanceId: string;
   instanceStatus?: string;
+  instanceType?: string;
 };
 
 const VirtualMachinePageTitle = ({
   instanceName,
-  instanceId,
   instanceStatus,
+  instanceType,
 }: PageTitleProps) => {
   return (
     <div className="flex gap-4 items-center">
       <SectionIcon>
-        <RiInstanceFill
-          size={32}
-          className="text-gray-500 shrink-0 transition-all"
-        />
+        {instanceType === "jupiter_hub" ? (
+          <SiJupyter
+            size={32}
+            className="text-gray-500 shrink-0 transition-all p-0.5"
+          />
+        ) : (
+          <RiInstanceFill
+            size={32}
+            className="text-gray-500 shrink-0 transition-all"
+          />
+        )}
       </SectionIcon>
       <div>
         <Breadcrumbs
@@ -32,7 +40,7 @@ const VirtualMachinePageTitle = ({
               link: PAGES.VIRTUAL_MACHINES.path,
             },
             {
-              name: instanceId,
+              name: instanceName,
               link: "",
             },
           ]}

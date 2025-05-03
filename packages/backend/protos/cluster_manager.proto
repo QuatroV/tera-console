@@ -59,6 +59,31 @@ message GetInstanceStatusResponse {
   InstanceStatus status = 2;
 }
 
+message LogLine {
+  string line = 1;
+}
+
+// Запрос на выполнение команды
+message ExecRequest {
+  string instance_id = 1;
+  string command     = 2;
+}
+// Ответная строка вывода
+message ExecResponse {
+  string output = 1;
+}
+
+// Ответ с одним срезом метрик
+message StatsResponse {
+   double cpu_percent       = 1;
+   uint64 memory_usage      = 2; // байты
+   uint64 memory_limit      = 3; // байты
+   uint64 blk_read          = 4; // байты
+   uint64 blk_write         = 5; // байты
+   uint64 net_rx_bytes      = 6;
+   uint64 net_tx_bytes      = 7;
+}
+
 // Определение сервиса
 service ClusterManager {
   rpc CreateInstance(CreateInstanceRequest) returns (InstanceResponse);
@@ -66,4 +91,7 @@ service ClusterManager {
   rpc StopInstance(InstanceActionRequest) returns (InstanceActionResponse);
   rpc StartInstance(InstanceActionRequest) returns (InstanceActionResponse);
   rpc DeleteInstance(InstanceActionRequest) returns (InstanceActionResponse);
+  rpc StreamLogs(InstanceActionRequest) returns (stream LogLine);
+  rpc ExecCommand(ExecRequest) returns (stream ExecResponse);
+  rpc StreamStats(InstanceActionRequest) returns (stream StatsResponse);
 }
