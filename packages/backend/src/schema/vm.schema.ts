@@ -37,3 +37,8 @@ export const execCommandSchema = z.object({
 export const streamStatsSchema = z.object({
   instanceId: z.string(),
 });
+
+export const renameInstanceSchema = z.object({
+  instanceId: z.string(),
+  newName: z.string(),
+});

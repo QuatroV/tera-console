@@ -14,12 +14,14 @@ import {
   findInstance,
   findUserInstances,
   deleteInstance as deleteInstanceDB,
+  updateInstance,
 } from "../services/db.service";
 import {
   createInstanceSchema,
   deleteInstanceSchema,
   execCommandSchema,
   getInstanceSchema,
+  renameInstanceSchema,
   startInstanceSchema,
   stopInstanceSchema,
   streamLogsSchema,
@@ -317,6 +319,25 @@ const vmRouter = router({
       } finally {
         if (!signal?.aborted) call.cancel();
       }
+    }),
+  renameInstance: privateProcedure
+    .input(renameInstanceSchema)
+    .mutation(async ({ input, ctx }) => {
+      if (!ctx.user) throw new Error("Пользователь не авторизован");
+
+      const instance = await findInstance({ id: input.instanceId });
+      if (!instance) throw new Error("Инстанс не найден");
+
+      const updated = await updateInstance(
+        { id: input.instanceId },
+        { name: input.newName },
+        undefined
+      );
+
+      return {
+        status: "success",
+        instance: updated,
+      };
     }),
 });
 

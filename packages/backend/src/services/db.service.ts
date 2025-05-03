@@ -103,3 +103,15 @@ export const deleteInstance = async (
     select,
   });
 };
+
+export const updateInstance = async (
+  where: Prisma.InstanceWhereUniqueInput,
+  data: Prisma.InstanceUpdateInput,
+  select?: Prisma.InstanceSelect
+) => {
+  return await prisma.instance.update({
+    where,
+    data,
+    select,
+  });
+};
