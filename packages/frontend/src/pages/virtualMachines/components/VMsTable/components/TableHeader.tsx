@@ -18,7 +18,7 @@ const TableHeader = ({ setSearchTerm }: TableHeaderProps) => {
         onClick={() => navigate(PAGES.CREATE_VIRTUAL_MACHINE.path)}
         variant="filled"
         size="large"
-        className="p-4 text-md flex items-center gap-2 rounded-2xl"
+        className="p-3 text-sm flex items-center gap-2 rounded-2xl"
       >
         <BiPlus size={32} />
         Добавить инстанс
@@ -28,7 +28,7 @@ const TableHeader = ({ setSearchTerm }: TableHeaderProps) => {
         <Input
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Поиск по инстансам"
-          className="w-full p-4 outline-indigo-300 px-12 border"
+          className="w-full p-3 outline-indigo-300 px-12 border text-sm"
         ></Input>
         <IoMdClose
           className="fill-gray-700 absolute right-3 cursor-pointer"

@@ -12,6 +12,7 @@ import Project from "@/pages/project";
 import VerifyEmail from "@/pages/verifyEmail";
 import VirtualMachine from "@/pages/virtualMachines/pages/virtualMachine";
 import S3 from "@/pages/s3";
+import BucketPage from "@/pages/s3/pages/bucket/BucketPage";
 
 export const PAGES = {
   WELCOME: {
@@ -53,6 +54,10 @@ export const PAGES = {
   S3: {
     name: "s3",
     path: "/s3",
+  },
+  BUCKET: {
+    name: "bucket",
+    path: "/s3/:id",
   },
 } as const;
 
@@ -107,6 +112,11 @@ export const PAGES_ROUTES: RouteObject[] = [
             id: PAGES.S3.name,
             path: PAGES.S3.path,
             element: <S3 />,
+          },
+          {
+            id: PAGES.BUCKET.name,
+            path: PAGES.BUCKET.path,
+            element: <BucketPage />,
           },
         ],
       },
