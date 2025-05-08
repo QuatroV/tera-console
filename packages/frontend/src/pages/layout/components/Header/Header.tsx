@@ -34,6 +34,7 @@ const Header = () => {
           name={user?.name}
           surname=""
           email={user?.email}
+          src={user?.photo}
         />
       </div>
     </div>

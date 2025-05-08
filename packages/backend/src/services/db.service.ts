@@ -115,3 +115,8 @@ export const updateInstance = async (
     select,
   });
 };
+
+export const deleteUser = async (
+  where: Prisma.UserWhereUniqueInput,
+  select?: Prisma.UserSelect
+) => prisma.user.delete({ where, select });

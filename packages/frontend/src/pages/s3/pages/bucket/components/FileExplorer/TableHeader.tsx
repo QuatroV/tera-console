@@ -3,7 +3,6 @@ import Input from "@/components/Input";
 import { BiFolderPlus, BiUpload } from "react-icons/bi";
 import { IoClose, IoSearch } from "react-icons/io5";
 import { useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 
 type Props = {
   prefix: string;
@@ -18,7 +17,6 @@ export default function TableHeader({
 }: Props) {
   const [term, setTerm] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const { id: bucket } = useParams<{ id: string }>();
 
   const handleFileClick = () => inputRef.current?.click();
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

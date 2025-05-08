@@ -100,14 +100,18 @@ export default function Table({
         sortingFn: "alphanumeric",
         cell: ({ row }) => (
           <span
-            className="text-blue-600 hover:underline cursor-pointer flex items-center gap-1"
+            className="text-blue-600 hover:underline cursor-pointer flex items-center gap-1 "
             onClick={() =>
               row.original.IsDir
                 ? onDirClick(row.original.Key)
                 : onFileClick(row.original.Key)
             }
           >
-            {row.original.IsDir ? <RiFolderFill /> : <RiFile3Fill />}
+            {row.original.IsDir ? (
+              <RiFolderFill className=" shrink-0 " />
+            ) : (
+              <RiFile3Fill className=" shrink-0" />
+            )}
             {row.original.Name}
           </span>
         ),
