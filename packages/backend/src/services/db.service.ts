@@ -1,4 +1,4 @@
-import { Instance, Prisma, User } from "@prisma/client";
+import { Instance, Prisma, S3Bucket, User } from "@prisma/client";
 import customConfig from "../config/default";
 import redisClient from "../utils/connectRedis";
 import { signJwt } from "../utils/jwt";
@@ -120,3 +120,41 @@ export const deleteUser = async (
   where: Prisma.UserWhereUniqueInput,
   select?: Prisma.UserSelect
 ) => prisma.user.delete({ where, select });
+
+export const createS3Bucket = async (
+  name: string,
+  userId: string
+): Promise<S3Bucket> => {
+  return await prisma.s3Bucket.create({
+    data: { name, userId },
+  });
+};
+
+export const findUserS3Buckets = async (
+  userId: string
+): Promise<S3Bucket[]> => {
+  return await prisma.s3Bucket.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+  });
+};
+
+export const findS3Bucket = async (
+  where: Prisma.S3BucketWhereInput
+): Promise<S3Bucket | null> => {
+  return await prisma.s3Bucket.findFirst({ where });
+};
+
+export const deleteS3Bucket = async (name: string): Promise<S3Bucket> => {
+  return await prisma.s3Bucket.delete({ where: { name } });
+};
+
+export const renameS3Bucket = async (
+  oldName: string,
+  newName: string
+): Promise<S3Bucket> => {
+  return await prisma.s3Bucket.update({
+    where: { name: oldName },
+    data: { name: newName },
+  });
+};

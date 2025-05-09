@@ -14,12 +14,14 @@ const VMMainTab = (props: VMMainTabProps) => {
     props;
 
   return instanceProperties ? (
-    <VMTable
-      instanceId={instanceId || ""}
-      instanceStatus={instanceStatus || ""}
-      setInstanceStatus={setInstanceStatus}
-      properties={instanceProperties}
-    />
+    <div>
+      <VMTable
+        instanceId={instanceId || ""}
+        instanceStatus={instanceStatus || ""}
+        setInstanceStatus={setInstanceStatus}
+        properties={instanceProperties}
+      />
+    </div>
   ) : (
     <div className="bg-white rounded-2xl h-64 p-2 mb-4 flex items-center justify-center">
       <div className="flex flex-col items-center gap-2">

@@ -42,7 +42,6 @@ const getPrefix = () =>
   new URLSearchParams(window.location.search).get("key") ?? "";
 
 function formatBytes(bytes: number): string {
-  console.log(bytes);
   if (bytes === 0) return "0 Б";
   const sizes = ["Б", "КБ", "МБ", "ГБ", "ТБ"];
   const i = Math.max(0, Math.floor(Math.log(bytes) / Math.log(1024)));
@@ -100,7 +99,7 @@ export default function Table({
         sortingFn: "alphanumeric",
         cell: ({ row }) => (
           <span
-            className="text-blue-600 hover:underline cursor-pointer flex items-center gap-1 "
+            className="text-blue-600 hover:underline cursor-pointer flex items-center gap-1"
             onClick={() =>
               row.original.IsDir
                 ? onDirClick(row.original.Key)
@@ -123,10 +122,6 @@ export default function Table({
           row.original.IsDir || row.original.Size === "-"
             ? "-"
             : formatBytes(Number(row.original.Size)),
-      },
-      {
-        header: "Класс хранения",
-        accessorKey: "StorageClass",
       },
       {
         header: "Изменён",
@@ -227,7 +222,11 @@ export default function Table({
           {r.getVisibleCells().map((cell) => (
             <div
               key={cell.id}
-              className={cell.column.id === "actions" ? "w-32" : "flex-1"}
+              className={
+                cell.column.id === "actions"
+                  ? "w-32"
+                  : "flex-1 overflow-hidden text-ellipsis break-words"
+              }
             >
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </div>

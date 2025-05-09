@@ -4,11 +4,20 @@ import { useNavigate } from "react-router-dom";
 import { trpc } from "@/utils/api";
 import { useState } from "react";
 import Spinner from "@/components/Spinner";
+import NoBuckets from "./NoBuckets";
 
 type Props = {
   buckets: Bucket[];
   onRefresh: () => void;
 };
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 Б";
+  const sizes = ["Б", "КБ", "МБ", "ГБ", "ТБ"];
+  const i = Math.max(0, Math.floor(Math.log(bytes) / Math.log(1024)));
+  const value = bytes / Math.pow(1024, i);
+  return `${value.toFixed(1)} ${sizes[i]}`;
+}
 
 export default function BucketList({ buckets, onRefresh }: Props) {
   const nav = useNavigate();
@@ -18,7 +27,7 @@ export default function BucketList({ buckets, onRefresh }: Props) {
     if (!confirm(`Удалить бакет «${name}»? ВСЕ данные будут потеряны!`)) return;
     try {
       setProcessing(name);
-      await trpc.s3.deleteBucket.mutate({ bucket: name });
+      await trpc.s3.deleteBucket.mutate({ name });
       onRefresh();
     } catch (e) {
       alert("Не удалось удалить бакет");
@@ -43,10 +52,14 @@ export default function BucketList({ buckets, onRefresh }: Props) {
     }
   };
 
+  if (!buckets.length) return <NoBuckets />;
+
   return (
     <>
-      <div className="grid grid-cols-3 font-semibold bg-gray-200 p-4 rounded-2xl">
+      <div className="grid grid-cols-5 font-semibold bg-gray-200 p-4 rounded-2xl">
         <span>Имя</span>
+        <span>Количество объектов</span>
+        <span>Общий вес</span>
         <span>Дата создания</span>
         <span className="text-right">Действия</span>
       </div>
@@ -54,7 +67,7 @@ export default function BucketList({ buckets, onRefresh }: Props) {
       {buckets.map((b) => (
         <div
           key={b.Name}
-          className="grid grid-cols-3 px-4 py-3 hover:bg-gray-50 items-center rounded-2xl"
+          className="grid grid-cols-5 px-4 py-3 hover:bg-gray-50 items-center rounded-2xl"
         >
           <span
             className="text-indigo-600 underline cursor-pointer"
@@ -62,6 +75,10 @@ export default function BucketList({ buckets, onRefresh }: Props) {
           >
             {b.Name}
           </span>
+
+          <span>{b.ObjectCount}</span>
+
+          <span>{b.TotalSize ? formatBytes(b.TotalSize) : "-"}</span>
 
           <span>
             {b.CreationDate

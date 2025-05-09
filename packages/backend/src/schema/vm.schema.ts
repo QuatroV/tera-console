@@ -42,3 +42,19 @@ export const renameInstanceSchema = z.object({
   instanceId: z.string(),
   newName: z.string(),
 });
+
+export const backupInstanceSchema = z.object({
+  instanceId: z.string().min(1),
+  bucket: z.string().min(3),
+  key: z.string().min(1).optional(),
+});
+
+export const restoreInstanceSchema = z.object({
+  instanceName: z.string().min(1),
+  instanceType: z.string().min(1),
+  bucket: z.string().min(3),
+  key: z.string().min(1),
+  cpu: z.number().optional(),
+  memory: z.number().optional(),
+  storage: z.number().optional(),
+});

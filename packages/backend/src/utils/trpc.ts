@@ -8,7 +8,6 @@ import customConfig from "../config/default";
 const t = initTRPC.context<HTTPContext>().create(); // initialize trpc (must be done once)
 
 const isAuthorized = t.middleware(({ ctx, next }) => {
-  console.log("DEBUG :", ctx.user);
   if (!ctx.user) {
     throw new TRPCError({
       code: "UNAUTHORIZED",

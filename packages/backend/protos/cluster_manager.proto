@@ -84,6 +84,40 @@ message StatsResponse {
    uint64 net_tx_bytes      = 7;
 }
 
+// Запрос на бэкап контейнера
+message BackupRequest {
+  // UUID контейнера (instance_id)
+  string instance_id = 1;
+}
+
+// Чанк бинарных данных (TAR), который будет стримиться
+message BackupChunk {
+  bytes chunk = 1;
+}
+
+message RestoreMetadata {
+  string instance_name = 1;
+  string instance_type = 2;
+  string user_id       = 3;
+  int32 cpu_units      = 4;
+  int32 mem_mb         = 5;
+  int32 storage_gb     = 6;
+}
+
+message RestoreRequest {
+  oneof payload {
+    RestoreMetadata metadata = 1;
+    bytes          chunk    = 2;
+  }
+}
+
+message RestoreResponse {
+  string instance_id = 1;
+  int32 status = 2;
+  string message = 3;
+  string hub_link = 4;
+}
+
 // Определение сервиса
 service ClusterManager {
   rpc CreateInstance(CreateInstanceRequest) returns (InstanceResponse);
@@ -94,4 +128,6 @@ service ClusterManager {
   rpc StreamLogs(InstanceActionRequest) returns (stream LogLine);
   rpc ExecCommand(ExecRequest) returns (stream ExecResponse);
   rpc StreamStats(InstanceActionRequest) returns (stream StatsResponse);
+  rpc BackupInstance (BackupRequest) returns (stream BackupChunk);
+  rpc RestoreInstance (stream RestoreRequest) returns (RestoreResponse);
 }

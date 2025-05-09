@@ -156,3 +156,57 @@ export function streamStats(instanceId: string): grpc.ClientReadableStream<{
 }> {
   return (client as any).StreamStats({ instance_id: instanceId });
 }
+
+export function backupInstanceStream(
+  instanceId: string
+): grpc.ClientReadableStream<{ chunk: Uint8Array }> {
+  return (client as any).BackupInstance({ instance_id: instanceId });
+}
+
+export interface RestoreResponse {
+  instance_id: string;
+  status: number;
+  message: string;
+  hub_link: string;
+}
+
+export function restoreInstance(
+  instanceName: string,
+  instanceType: string,
+  backupStream: NodeJS.ReadableStream,
+  userId: string,
+  cpu: number,
+  memory: number,
+  storage: number
+): Promise<RestoreResponse> {
+  return new Promise((resolve, reject) => {
+    // 1) Зовём stub только с колбэком — metadata не передаём здесь
+    const call = (client as any).restoreInstance(
+      (err: any, resp: RestoreResponse) => {
+        if (err) return reject(err);
+        resolve(resp);
+      }
+    );
+
+    // 2) Ловим ошибки самого стрима
+    call.on("error", (err: any) => {
+      reject(err);
+    });
+
+    // 3) Первый вызов write — ваши метаданные (в любом порядке отправки)
+    call.write({
+      metadata: {
+        name: instanceName,
+        instance_type: instanceType,
+        cpu_units: cpu,
+        mem_mb: memory,
+        storage_gb: storage,
+      },
+    });
+
+    // 4) Пайпим backupStream как куски архива
+    backupStream.on("data", (chunk: Buffer) => call.write({ chunk }));
+    backupStream.on("end", () => call.end());
+    backupStream.on("error", (err) => call.destroy(err));
+  });
+}

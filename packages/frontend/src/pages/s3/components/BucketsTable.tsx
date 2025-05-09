@@ -13,6 +13,8 @@ export type Bucket = {
   Name?: string;
   CreationDate?: string;
   BucketRegion?: string;
+  ObjectCount?: number;
+  TotalSize?: number;
 };
 
 const BucketsTable = () => {

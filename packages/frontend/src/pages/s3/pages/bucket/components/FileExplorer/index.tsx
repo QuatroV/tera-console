@@ -4,8 +4,6 @@ import trpc from "@/utils/api";
 import Card from "@/components/Card";
 import TableHeader from "./TableHeader";
 import Table, { RowFile } from "./Table";
-import { FaBucket } from "react-icons/fa6";
-import { IoDownload } from "react-icons/io5";
 import DragOverlay from "./DragOverlay";
 import ProgressModal from "./ProgressModal";
 
@@ -17,11 +15,9 @@ export default function FileExplorer() {
   const [files, setFiles] = useState<RowFile[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // drag/drop
   const dragCounter = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
 
-  // upload progress
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -39,6 +35,7 @@ export default function FileExplorer() {
     },
     [bucket, prefix]
   );
+
   useEffect(() => {
     fetchList();
   }, [fetchList]);

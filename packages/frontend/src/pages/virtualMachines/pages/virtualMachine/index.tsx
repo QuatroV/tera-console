@@ -35,6 +35,9 @@ const VirtualMachine = () => {
           instanceType: res.instance.instanceType,
           createdAt: res.instance.createdAt,
           link: res.instance.link,
+          lastBackupBucket: res.instance.lastBackupBucket || "-",
+          lastBackupKey: res.instance.lastBackupKey || "-",
+          lastBackupAt: res.instance.lastBackupAt || "-",
         });
         setInstanceStatus(res.instance.status);
       } catch (e) {

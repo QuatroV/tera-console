@@ -21,6 +21,10 @@ const Select = (props: SelectProps) => {
     setCollapsed(true);
   });
 
+  const onDropdownClick = () => {
+    setCollapsed(true);
+  };
+
   return (
     <div className={cn("relative overflow-visible", className)}>
       <SelectButton onClick={() => setCollapsed((prevState) => !prevState)}>
@@ -31,6 +35,7 @@ const Select = (props: SelectProps) => {
           dropdownRef={dropdownRef}
           className={dropdownClassName}
           options={options}
+          onDropdownClick={onDropdownClick}
         />
       )}
     </div>
