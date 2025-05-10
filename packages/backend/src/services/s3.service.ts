@@ -9,6 +9,16 @@ import {
   DeleteBucketCommand,
   GetObjectCommand,
   GetObjectCommandOutput,
+  PutBucketVersioningCommand,
+  GetBucketAclCommand,
+  PutBucketAclCommand,
+  GetBucketVersioningCommand,
+  PutBucketLifecycleConfigurationCommand,
+  GetBucketLifecycleConfigurationCommand,
+  PutBucketEncryptionCommand,
+  GetBucketEncryptionCommand,
+  PutBucketLoggingCommand,
+  GetBucketLoggingCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Upload } from "@aws-sdk/lib-storage";
@@ -204,4 +214,146 @@ export async function downloadStream(
     throw new Error("S3: unexpected Body type (не Readable)");
   }
   return Body;
+}
+
+export async function getBucketLogging(bucket: string): Promise<boolean> {
+  const res = await s3.send(new GetBucketLoggingCommand({ Bucket: bucket }));
+  return Boolean(res.LoggingEnabled);
+}
+
+export async function setBucketLogging(
+  bucket: string,
+  enabled: boolean
+): Promise<void> {
+  await s3.send(
+    new PutBucketLoggingCommand({
+      Bucket: bucket,
+      BucketLoggingStatus: enabled
+        ? { LoggingEnabled: { TargetBucket: bucket, TargetPrefix: "logs/" } }
+        : {},
+    })
+  );
+}
+
+export async function getBucketEncryption(bucket: string): Promise<boolean> {
+  try {
+    const res = await s3.send(
+      new GetBucketEncryptionCommand({ Bucket: bucket })
+    );
+    return (
+      res.ServerSideEncryptionConfiguration?.Rules?.some(
+        (r) => r.ApplyServerSideEncryptionByDefault?.SSEAlgorithm === "AES256"
+      ) ?? false
+    );
+  } catch {
+    return false; // еслиEncryptionConfiguration отсутствует
+  }
+}
+
+export async function setBucketEncryption(
+  bucket: string,
+  enabled: boolean
+): Promise<boolean> {
+  if (!enabled) {
+    const { DeleteBucketEncryptionCommand } = await import(
+      "@aws-sdk/client-s3"
+    );
+    await s3.send(new DeleteBucketEncryptionCommand({ Bucket: bucket }));
+    return false;
+  }
+
+  const alreadyOn = await getBucketEncryption(bucket);
+  if (alreadyOn) true;
+
+  try {
+    await s3.send(
+      new PutBucketEncryptionCommand({
+        Bucket: bucket,
+        ServerSideEncryptionConfiguration: {
+          Rules: [
+            { ApplyServerSideEncryptionByDefault: { SSEAlgorithm: "AES256" } },
+          ],
+        },
+      })
+    );
+    return true; // успех
+  } catch (e: any) {
+    if (String(e.message).includes("KMS is not configured")) {
+      return false; // шифрование недоступно
+    }
+    throw e; // другая ошибка – пробрасываем
+  }
+}
+
+export async function getBucketLifecycle(
+  bucket: string
+): Promise<number | null> {
+  try {
+    const res = await s3.send(
+      new GetBucketLifecycleConfigurationCommand({ Bucket: bucket })
+    );
+    const rule = res.Rules?.find((r) => r.ID === "auto-expire");
+    const days = rule?.Expiration?.Days;
+    return typeof days === "number" ? days : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function setBucketLifecycle(
+  bucket: string,
+  days: number
+): Promise<void> {
+  await s3.send(
+    new PutBucketLifecycleConfigurationCommand({
+      Bucket: bucket,
+      LifecycleConfiguration: {
+        Rules: [
+          {
+            ID: "auto-expire",
+            Status: "Enabled",
+            Filter: {},
+            Expiration: { Days: days },
+          },
+        ],
+      },
+    })
+  );
+}
+
+export async function setBucketAcl(
+  bucket: string,
+  acl: "private" | "public-read"
+): Promise<void> {
+  await s3.send(new PutBucketAclCommand({ Bucket: bucket, ACL: acl }));
+}
+
+export async function getBucketAcl(bucket: string): Promise<string> {
+  const res = await s3.send(new GetBucketAclCommand({ Bucket: bucket }));
+  const isPublic = res.Grants?.some(
+    (g) =>
+      g.Grantee?.URI === "http://acs.amazonaws.com/groups/global/AllUsers" &&
+      g.Permission === "READ"
+  );
+  return isPublic ? "public-read" : "private";
+}
+
+// Versioning
+export async function setBucketVersioning(
+  bucket: string,
+  enabled: boolean
+): Promise<void> {
+  await s3.send(
+    new PutBucketVersioningCommand({
+      Bucket: bucket,
+      VersioningConfiguration: {
+        Status: enabled ? "Enabled" : "Suspended",
+      },
+    })
+  );
+}
+
+export async function getBucketVersioning(bucket: string): Promise<string> {
+  const res = await s3.send(new GetBucketVersioningCommand({ Bucket: bucket }));
+  return res.Status ?? "Suspended";
 }

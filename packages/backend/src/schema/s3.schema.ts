@@ -23,3 +23,12 @@ export const keyInputSchema = z.object({
   bucket: z.string().min(3),
   key: z.string().min(1),
 });
+
+export const bucketSettingsSchema = z.object({
+  bucket: z.string(),
+  publicRead: z.boolean(),
+  versioning: z.boolean(),
+  accessLogging: z.boolean().optional(),
+  encryption: z.boolean().optional(),
+  expirationDays: z.number().int().positive().optional(),
+});

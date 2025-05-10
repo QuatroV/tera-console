@@ -9,6 +9,7 @@ import {
   renameS3Bucket,
 } from "../services/db.service";
 import {
+  bucketSettingsSchema,
   createBucketSchema,
   createFolderSchema,
   deleteBucketSchema,
@@ -139,6 +140,52 @@ export const s3Router = router({
     .mutation(async ({ input }) => {
       await S3.removeObject(input.bucket, input.key);
       return { status: "success" };
+    }),
+  getBucketSettings: privateProcedure
+    .input(z.object({ bucket: z.string() }))
+    .query(async ({ input, ctx }) => {
+      if (!ctx.user) throw new Error("Пользователь не авторизован");
+      const [acl, versioning, logging, enc, life] = await Promise.all([
+        S3.getBucketAcl(input.bucket),
+        S3.getBucketVersioning(input.bucket),
+        S3.getBucketLogging(input.bucket),
+        S3.getBucketEncryption(input.bucket),
+        S3.getBucketLifecycle(input.bucket),
+      ]);
+      return {
+        status: "success" as const,
+        publicRead: acl === "public-read",
+        versioning: versioning === "Enabled",
+        accessLogging: logging,
+        encryption: enc,
+        expirationDays: life ?? undefined,
+      };
+    }),
+
+  updateBucketSettings: privateProcedure
+    .input(bucketSettingsSchema)
+    .mutation(async ({ input, ctx }) => {
+      if (!ctx.user) throw new Error("Пользователь не авторизован");
+
+      try {
+        await Promise.all([
+          S3.setBucketAcl(
+            input.bucket,
+            input.publicRead ? "public-read" : "private"
+          ),
+          S3.setBucketVersioning(input.bucket, input.versioning),
+          S3.setBucketLogging(input.bucket, input.accessLogging ?? false),
+          S3.setBucketEncryption(input.bucket, input.encryption ?? false),
+          input.expirationDays !== undefined &&
+            S3.setBucketLifecycle(input.bucket, input.expirationDays),
+        ]);
+
+        return { status: "success" as const };
+      } catch (err) {
+        console.error(err);
+
+        return { status: "error" as const };
+      }
     }),
 });
 

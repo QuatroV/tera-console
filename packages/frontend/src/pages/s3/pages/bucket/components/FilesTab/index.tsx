@@ -7,7 +7,7 @@ import Table, { RowFile } from "./Table";
 import DragOverlay from "./DragOverlay";
 import ProgressModal from "./ProgressModal";
 
-export default function FileExplorer() {
+export default function FilesTab() {
   const [params, setParams] = useSearchParams();
   const prefix = params.get("key") ?? "";
   const { id: bucket } = useParams<{ id: string }>();
